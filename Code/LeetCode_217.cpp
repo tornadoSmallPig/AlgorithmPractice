@@ -17,12 +17,14 @@ struct HashMap
 bool containsDuplicate(vector<int> nums) 
 {
     HashMap* m = (HashMap*)malloc(sizeof(HashMap));//创建哈希表
-    m->map = (HashItem*)malloc(sizeof(HashItem) * nums.size() * 1.1);//分配地址
+    m->map = (HashItem*)malloc(sizeof(HashItem) * nums.size() * 1.1);//分配地址空间（该空间要有一定剩余，以防止内存溢出）
     m->size = 0;//size设零
     memset(m->map, 0, sizeof(HashItem) * nums.size());//全设置为0
     int hashpos = 0;//哈希地址
     int hashLen = nums.size();//哈希表长度
-    int hashSlice = 0;
+    int hashSlice = 0;        //哈希子表大小
+
+    /*根据hash表的长度确定哈希子表的大小*/
     if (hashLen < 100)
     {
         hashSlice = 1;
@@ -36,25 +38,22 @@ bool containsDuplicate(vector<int> nums)
         hashSlice = 1000;
     }
 
-    for (int i = 0; i < hashLen; i++)
+    for (int i = 0; i < hashLen; i++)//遍历每个元素
     {
         int j = 0;
         int pos = 0;
         int last = -1;
-        hashpos = nums[i] % hashSlice;
-        if (hashpos < 0) hashpos = ~hashpos + 1;
+        hashpos = nums[i] % hashSlice;//哈希函数为 hashpos = 数组下标 % hashSlice（哈希子表长度）
+        if (hashpos < 0) hashpos = ~hashpos + 1;//如果为负数，则取反加一（其作用是对操作数的每一个二进制位取反）
         do
         {
             pos = hashpos + (hashSlice * j);
-            if (m->map[pos].set)
+            if (m->map[pos].set)//如果存放了元素
             {
-                if (m->map[pos].set)
+                if (m->map[pos].data == nums[i])
                 {
-                    if (m->map[pos].data == nums[i])
-                    {
-                        return true;
-                    }
-                }
+                    return true;
+                }    
             }
             else if (last == -1)
             {
